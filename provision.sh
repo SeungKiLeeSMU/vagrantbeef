@@ -1,6 +1,7 @@
 #!/bin/bash
 
 mysql_config_file="/etc/mysql/my.cnf"
+php_config_file="/etc/php5/apache2/php.ini"
 
 main() {
     apt-get update
@@ -44,7 +45,8 @@ setup_mysql() {
 }
 
 setup_php () {
-    apt-get -y install php php-cli
+    apt-get -y install php php-cli libapache2-mod-php php-mysql php-mcrypt
+    systemctl restart apache2
 }
 
 setup_misc () {
