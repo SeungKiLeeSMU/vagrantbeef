@@ -8,6 +8,7 @@ main() {
     setup_apache
     setup_mysql
     setup_php
+    setup_node
     setup_misc
 }
 
@@ -22,24 +23,24 @@ setup_mysql() {
         debconf-set-selections
     apt-get -y install mysql-client mysql-server
 
-	sed -i "s/bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/" \
-		${mysql_config_file}
+    sed -i "s/bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/" \
+        ${mysql_config_file}
 
-	# Allow root access from any host
-	echo "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'root' WITH GRANT OPTION" | mysql -u root --password=root
-	echo "GRANT PROXY ON ''@'' TO 'root'@'%' WITH GRANT OPTION" | mysql -u root --password=root
+    # Allow root access from any host
+    echo "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'root' WITH GRANT OPTION" | mysql -u root --password=root
+    echo "GRANT PROXY ON ''@'' TO 'root'@'%' WITH GRANT OPTION" | mysql -u root --password=root
 
-	if [ -d "/vagrant/provision-sql" ]; then
-		echo "Executing all SQL files in /vagrant/provision-sql folder ..."
-		echo "-------------------------------------"
-		for sql_file in /vagrant/provision-sql/*.sql
-		do
-			echo "EXECUTING $sql_file..."
-	  		time mysql -u root --password=root < $sql_file
-	  		echo "FINISHED $sql_file"
-	  		echo ""
-		done
-	fi
+    if [ -d "/vagrant/provision-sql" ]; then
+        echo "Executing all SQL files in /vagrant/provision-sql folder ..."
+        echo "-------------------------------------"
+        for sql_file in /vagrant/provision-sql/*.sql
+        do
+            echo "EXECUTING $sql_file..."
+            time mysql -u root --password=root < $sql_file
+            echo "FINISHED $sql_file"
+            echo ""
+        done
+    fi
 
     systemctl mysql restart
 }
@@ -47,6 +48,22 @@ setup_mysql() {
 setup_php () {
     apt-get -y install php php-cli libapache2-mod-php php-mysql php-mcrypt
     systemctl restart apache2
+}
+
+setup_node () {
+    #install nvm
+    curl -o- \
+        https://raw.githubusercontent.com/creationix/nvm/v0.33.1/install.sh | \
+        bash
+
+	# load nvm
+	export NVM_DIR="$HOME/.nvm"
+	[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
+    #setup nvm to use the LTS version
+    nvm install --lts
+
+    npm install -g @angular/cli
 }
 
 setup_misc () {
