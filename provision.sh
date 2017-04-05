@@ -1,19 +1,47 @@
 #!/bin/bash
 
 mysql_config_file="/etc/mysql/my.cnf"
-php_config_file="/etc/php5/apache2/php.ini"
 
 main() {
     apt-get update
     setup_apache
     setup_mysql
     setup_php
-    setup_node
     setup_misc
 }
 
 setup_apache() {
     apt-get -y install apache2
+
+    # Set up virtualhost
+    cat << EOF > /etc/apache2/sites-available/beef.conf
+<VirtualHost *:80>
+	ServerAdmin webmaster@localhost
+	DocumentRoot /var/www/html/frontend
+
+	Alias /api /var/www/html/backend
+	<Directory /var/www/html/backend>
+		Options All
+		AllowOverride All
+		order allow,deny
+		allow from all
+	</Directory>
+
+	ErrorLog /var/log/apache2/error.log
+	CustomLog /var/log/apache2/access.log combined
+</VirtualHost>
+EOF
+
+    a2dissite 000-default
+    a2ensite beef
+    systemctl restart apache2
+
+    # Make dirs for frontend and backend
+
+    mkdir /var/www/html/frontend
+    echo 'frontbeef' > /var/www/html/frontend/index.html
+    mkdir /var/www/html/backend
+    echo '<?php echo "backbeef"; ?>' > /var/www/html/backend/index.php
 }
 
 setup_mysql() {
@@ -48,24 +76,6 @@ setup_mysql() {
 setup_php () {
     apt-get -y install php php-cli libapache2-mod-php php-mysql php-mcrypt
     systemctl restart apache2
-}
-
-setup_node () {
-    #install nvm
-    curl -o- \
-        https://raw.githubusercontent.com/creationix/nvm/v0.33.1/install.sh | \
-        bash
-
-	# load nvm
-	export NVM_DIR="$HOME/.nvm"
-	[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-
-    #setup nvm to use the LTS version
-    nvm install --lts
-
-    npm install -g @angular/cli
-    
-    npm install -g pm2
 }
 
 setup_misc () {
