@@ -64,6 +64,8 @@ setup_node () {
     nvm install --lts
 
     npm install -g @angular/cli
+    
+    npm install -g pm2
 }
 
 setup_misc () {
