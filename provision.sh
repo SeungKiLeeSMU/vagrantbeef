@@ -40,9 +40,9 @@ EOF
 
     mkdir /var/www/html/frontend
     mkdir /var/www/html/backend
-    sudo chown ubuntu /var/www/html/*
     echo 'frontbeef' > /var/www/html/frontend/index.html
     echo '<?php echo "backbeef"; ?>' > /var/www/html/backend/index.php
+    sudo chown -R ubuntu /var/www/html/
 }
 
 setup_mysql() {
