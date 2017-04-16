@@ -77,6 +77,12 @@ setup_mysql() {
 setup_php () {
     apt-get -y install php php-cli libapache2-mod-php php-mysql php-mcrypt
     systemctl restart apache2
+
+	# Install latest version of Composer globally
+	if [ ! -f "/usr/local/bin/composer" ]; then
+		curl -sS https://getcomposer.org/installer | \
+            php -- --install-dir=/usr/local/bin --filename=composer
+	fi
 }
 
 setup_misc () {
